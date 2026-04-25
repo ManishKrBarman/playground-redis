@@ -39,7 +39,7 @@ app.post("/send-otp", async (req, res) => {
   const otp = generateOTP();
 
   // Store OTP with expiry
-  await redisClient.setEx(`otp:valid:${mobile}`, 300, otp); // 5 mins expiry
+  await redisClient.set(`otp:valid:${mobile}`, otp, { EX: 300 }); // 5 mins expiry
   await redisClient.set(`otp:sent:${mobile}`, Date.now()); // Mark as sent
 
   console.log(`[SEND OTP] ${mobile} -> ${otp}`);
@@ -54,6 +54,44 @@ app.post("/verify-otp", async (req, res) => {
   if (!mobile || !otp) {
     return res.status(400).json({ error: "Mobile and OTP are required" });
   }
+  
+
+
+  // WAY -- 1
+  // const invalidAt = await redisClient.get(`otp:invalid:${mobile}`);
+
+  // if (invalidAt) {
+  //   const age = Math.floor((Date.now() - invalidAt) / 1000);
+  //   if (age < 5) {
+  //     return res
+  //       .status(429)
+  //       .json({ error: `Please wait ${5 - age} seconds before submiting OTP again` });
+  //   }
+  // }
+
+
+
+  // WAY -- 2
+  // const cooldown = await redisClient.get(`otp:cooldown:${mobile}`);
+  // if (cooldown) {
+    //   return res
+    //     .status(429)
+    //     .json({ error: `Please wait ${expiry} seconds before submiting OTP again` });
+    //   // return res.status(429).json({ error: `Please wait before submitting OTP again` });
+    // }
+  
+    
+
+  // WAY -- 3
+    const attemptsKey = `otp:attempts:${mobile}`;
+    const cooldownKey = `otp:cooldown:${mobile}`;
+    const ttl = await redisClient.ttl(cooldownKey);
+    if (ttl > 0) {
+      return res.status(429).json({
+        error: `Please wait ${ttl} seconds before submitting OTP again`
+      });
+    }
+
 
   const storedOtp = await redisClient.get(`otp:valid:${mobile}`);
 
@@ -62,12 +100,30 @@ app.post("/verify-otp", async (req, res) => {
   }
 
   if (parseInt(storedOtp) !== parseInt(otp)) {
+    // await redisClient.set(`otp:invalid:${mobile}`, Date.now()); // WAY -- 1
+    
+    // await redisClient.set(`otp:cooldown:${mobile}`, "1", { EX: 15 }); // WAY -- 2
+
+    const attempts = await redisClient.incr(attemptsKey); // WAY -- 3
+    if (attempts > 5) {
+      return res.status(400).json({ error: "Too many attempts" });
+    }
+    const expiry = attempts * 10;
+    await redisClient.set(cooldownKey, "1", { EX: expiry });
+    
     return res.status(400).json({ error: "Invalid OTP" });
   }
 
   // Clear OTP after successful verification
   await redisClient.del(`otp:valid:${mobile}`);
   await redisClient.del(`otp:sent:${mobile}`);
+
+  // await redisClient.del(`otp:invalid:${mobile}`); // WAY -- 1
+
+  // await redisClient.del(`otp:cooldown:${mobile}`); // WAY -- 2
+  
+  await redisClient.del(attemptsKey); // WAY -- 3
+  await redisClient.del(cooldownKey); // WAY -- 3
 
   console.log(`[VERIFY OTP] ${mobile} -> Verified`);
 
