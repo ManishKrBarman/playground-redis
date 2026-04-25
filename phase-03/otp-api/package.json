@@ -1,0 +1,11 @@
+{
+  "name": "otp-api",
+  "version": "1.0.0",
+  "description": "OTP generate and verify express api",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
