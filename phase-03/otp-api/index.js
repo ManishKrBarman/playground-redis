@@ -110,12 +110,31 @@ app.post("/verify-otp", async (req, res) => {
     // await redisClient.set(`otp:cooldown:${mobile}`, "1", { EX: 15 }); // WAY -- 2
 
     const attempts = await redisClient.incr(attemptsKey); // WAY -- 3
+
+    if (attempts === 1) {
+      await redisClient.expire(attemptsKey, 300); // 5 min
+    }
+    
     if (attempts > 5) {
       logger.error(`[${req.method}] [${mobile}] -> [Too many attempts] attempts: ${attempts} | [${new Date().toISOString()}]`);
       return res.status(400).json({ error: "Too many attempts" });
     }
     const expiry = attempts * 10;
-    await redisClient.set(cooldownKey, "1", { EX: expiry });
+    await redisClient.set(cooldownKey, "1", { EX: expiry}); 
+
+    // To prevent race condition
+
+    // const isSet = await redisClient.set(cooldownKey, "1", {
+    //   NX: true,
+    //   EX: expiry
+    // });
+
+    // if (!isSet) {
+    //   const ttl = await redisClient.ttl(cooldownKey);
+    //   return res.status(429).json({
+    //     error: `Please wait ${ttl} seconds`
+    //   });
+    // }
     
     logger.error(`[${req.method}] [${mobile}] -> [Invalid OTP] attempts: ${attempts} | cooling for ${expiry} seconds | [${new Date().toISOString()}]`);
     return res.status(400).json({ error: "Invalid OTP" });
