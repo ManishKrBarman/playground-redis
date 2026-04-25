@@ -1,0 +1,24 @@
+{
+  "name": "redis-playground",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for learning and practicing Redis",
+  "type": "module",
+  "workspaces": [
+    "phase-*",
+    "phase-*/cache-sim",
+    "phase-*/rate-limit",
+    "phase-*/otp-rate-limit",
+    "practice/*"
+  ],
+  "scripts": {
+    "start:redis": "redis-server",
+    "start:redis-cli": "redis-cli"
+  },
+  "dependencies": {
+    "redis": "^5.12.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
