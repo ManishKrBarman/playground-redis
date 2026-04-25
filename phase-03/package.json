@@ -1,0 +1,11 @@
+{
+    "name": "phase-03",
+    "version": "1.0.0",
+    "description": "Phase 03 — otp generate and verify express api",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js"
+    }
+}
