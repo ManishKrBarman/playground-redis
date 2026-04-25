@@ -1,0 +1,11 @@
+{
+  "name": "rate-limit",
+  "version": "1.0.0",
+  "description": "Rate Limiter",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
