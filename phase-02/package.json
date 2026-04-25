@@ -1,0 +1,11 @@
+{
+  "name": "phase-02",
+  "version": "1.0.0",
+  "description": "Phase 02 — Rate limiting & beyond",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
