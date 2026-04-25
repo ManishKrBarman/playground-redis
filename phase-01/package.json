@@ -1,0 +1,11 @@
+{
+  "name": "phase-01",
+  "version": "1.0.0",
+  "description": "Phase 01 — Redis basics & cache simulation",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
