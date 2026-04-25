@@ -9,6 +9,7 @@
     "phase-*/cache-sim",
     "phase-*/rate-limit",
     "phase-*/otp-rate-limit",
+    "phase-*/otp-api",
     "practice/*"
   ],
   "scripts": {
@@ -16,6 +17,7 @@
     "start:redis-cli": "redis-cli"
   },
   "dependencies": {
+    "express": "^5.2.1",
     "redis": "^5.12.1"
   },
   "devDependencies": {
